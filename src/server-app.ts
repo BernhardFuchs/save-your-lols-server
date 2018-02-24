@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {Application} from 'express';
+import {Application, Request, Response} from 'express';
 
 import {TclController} from './tcl-controller'
 
@@ -13,13 +13,23 @@ class ServerApp {
     }
     
     private configureRoutes() {
-        const router = express.Router();
-        router.get('/', (req, res) => {
+        const rootPath: string | RegExp | (string | RegExp)[] = '/';
+
+        this.app.route(rootPath).get((req, res, next) => {
+            console.log(`Root Path: ${rootPath}`);
             res.json({
                 message: 'Hello from Server'
             });
+            next();
         });
-        this.app.use('/', router);
+        
+        const randomPath: string | RegExp | (string | RegExp)[] = '/random';
+        this.app.route(randomPath).get((req: Request, res: Response) => {
+            console.log(`Random Path: ${randomPath}`);
+            console.log(`Request: ${req}`);
+            console.log('No error returned!!!');
+            res.sendStatus(200);
+        });
     }
 
 }
