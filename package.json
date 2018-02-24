@@ -5,6 +5,7 @@
   "author": "Bernhard Fuchs",
   "license": "ISC",
   "scripts": {
+    "start": "npm run build && npm run serve",
     "build": "tsc",
     "serve": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
