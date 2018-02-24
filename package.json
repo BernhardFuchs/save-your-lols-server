@@ -2,10 +2,11 @@
   "name": "save-your-lols-server",
   "version": "1.0.0",
   "description": "Backend for save-your-lols project",
-  "main": "index.js",
   "author": "Bernhard Fuchs",
   "license": "ISC",
   "scripts": {
+    "build": "tsc",
+    "serve": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
