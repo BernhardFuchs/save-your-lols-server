@@ -12,3 +12,5 @@
     </p>
 </div>
 ```
+## Regex to extract img src
+`<img.src="(http://tclhost.com/.+\.gif)".alt="image"./>``
