@@ -1,7 +1,9 @@
 import * as express from 'express';
+import * as http from 'http';
 import {Application, Request, Response} from 'express';
 
 import {TclController} from './tcl-controller'
+import { IncomingMessage } from 'http';
 
 class ServerApp {
     
@@ -24,11 +26,38 @@ class ServerApp {
         });
         
         const randomPath: string | RegExp | (string | RegExp)[] = '/random';
-        this.app.route(randomPath).get((req: Request, res: Response) => {
+        this.app.route(randomPath).get((req: Request, resToClient: Response) => {
             console.log(`Random Path: ${randomPath}`);
-            console.log(`Request: ${req}`);
-            console.log('No error returned!!!');
-            res.sendStatus(200);
+
+            const responseData = {
+                originUrl: ''
+            }
+
+            http.get('http://thecodinglove.com/random/', (incMessage: IncomingMessage) => {
+                
+                incMessage.on('data', (data) => {
+                    console.log(`Received Data: ${data.toString}`);
+                });
+
+                incMessage.on('readable', () => {
+                    console.log(`Readable Event returned!!!`);
+                });
+
+                incMessage.on('close', () => {
+                    console.log(`Closed with Status ${incMessage.statusCode} and Message ${incMessage.statusMessage}`);
+                });
+
+                incMessage.on('error', (err) => {
+                    console.log(`Error with Status ${err.name} and Message ${err.message} 
+                    and ${err.stack}`);
+                });
+
+                incMessage.on('end', () => {
+                    responseData.originUrl = incMessage.headers.location;
+                    resToClient.json(responseData);
+                });
+                
+            });
         });
     }
 
