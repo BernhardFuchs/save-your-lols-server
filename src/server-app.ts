@@ -4,7 +4,7 @@ import { Application, Request, Response } from 'express';
 
 import { IncomingMessage } from 'http';
 
-class ServerApp {
+export class ServerApp {
     
     app: Application;
     
@@ -97,5 +97,3 @@ class ServerApp {
     }
 
 }
-
-export default new ServerApp().app;

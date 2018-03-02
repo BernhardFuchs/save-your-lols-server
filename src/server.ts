@@ -1,7 +1,8 @@
-import app from './server-app'
+import {ServerApp} from './server-app'
 
 const port = process.env.PORT || 3000
 
+const app = new ServerApp().app;
 app.listen(port, (err) => {
   if (err) {
     return console.log(err)
