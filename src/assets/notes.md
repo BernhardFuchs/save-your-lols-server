@@ -1,4 +1,4 @@
-### Codesnippet that contains infos:
+## Codesnippet that contains infos:
 
 ```html
 <div class="centre">
@@ -12,5 +12,12 @@
     </p>
 </div>
 ```
-## Regex to extract img src
-`<img.src="(http://tclhost.com/.+\.gif)".alt="image"./>``
+## Regex:
+### Headline html-tag:
+`/(<h3>(.*?)<\/h3>)/g`
+### Remove html-tags:
+`/<[^>]*>/g`
+### Image html-tag:
+`/(<p class="e"><img src="(.*?)\.gif")/`
+### Extract Image-Url:
+`/(http(.*?)\.gif)/`

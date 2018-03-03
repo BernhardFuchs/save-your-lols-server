@@ -62,6 +62,8 @@ export class ServerApp {
 
                     const responseData = {
                         resHeaderLocation: '',
+                        resHeadline: '',
+                        resGifUrl:'',
                         resBody: ''
                     }
                     responseData.resHeaderLocation = incMessage.headers.location;
@@ -70,13 +72,19 @@ export class ServerApp {
                     http.get(responseData.resHeaderLocation, (incRedMsg: IncomingMessage) => {
 
                         let body: string = '';
+                        let headline: string ='';
+                        let gifUrl: string ='';
                         incRedMsg.on('data', (data) => {
                             body += data;
-                            console.log(`Redirect Data: ${data}`);
+                            // console.log(`Redirect Data: ${data}`);
                         });
 
                         incRedMsg.on('end', () => {
+                            headline = this.extractHeadline(body);
+                            gifUrl = this.extractGifUrl(body);
                             responseData.resBody = body;
+                            responseData.resHeadline = headline;
+                            responseData.resGifUrl = gifUrl;
                             resToClient.json(responseData);
                         });
 
@@ -94,6 +102,22 @@ export class ServerApp {
             });
 
         });
+    }
+
+    private extractHeadline(body: string): string  {
+        const foundHeadlines = body.match(/(<h3>(.*?)<\/h3>)/g);
+        console.log('found headlines', foundHeadlines);
+        const headline = foundHeadlines[0].replace(/<[^>]*>/g, '');
+        console.log('refined headline: ', headline);
+        return headline;
+    }
+
+    private extractGifUrl(body: string): string {
+        const foundGifUrls = body.match(/(<p class="e"><img src="(.*?)\.gif")/);
+        console.log('rawGifUrls: ', foundGifUrls[0]);
+        const gifUrl = foundGifUrls[0].match(/(http(.*?)\.gif)/);
+        console.log('found gifurls: ', gifUrl[0]);
+        return gifUrl[0];
     }
 
 }
