@@ -13,6 +13,23 @@ export class ServerApp {
         this.configureRoutes();
     }
     
+    private addHeaders(res) {
+        // Website you wish to allow to connect
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+
+        // Request methods you wish to allow
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+        // Request headers you wish to allow
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+        return res;
+        // Set to true if you need the website to include cookies in the requests sent
+        // to the API (e.g. in case you use sessions)
+        // res.setHeader('Access-Control-Allow-Credentials', true);
+
+        // Pass to next layer of middleware
+    }
+
     private configureRoutes() {
 
         // Root Route
@@ -25,10 +42,19 @@ export class ServerApp {
             next();
         });
         
-        // Random Lol Route
+        /*
+        - Create Data model for response incl namespace and builder
+        - add Router middleware
+        - Create controller to forward request to
+        - integrate RsJs to handle forwarding of the request
+        */
+
         const randomPath: string | RegExp | (string | RegExp)[] = '/random';
-        this.app.route(randomPath).get((req: Request, resToClient: Response) => {
+        // Random Lol Route
+        this.app.route(randomPath).get((req: Request, resToClient: Response, next) => {
             console.log(`Random Path: ${randomPath}`);
+
+            resToClient = this.addHeaders(resToClient);
 
             // Get Call to thecodinglove.com/random which gets redirected
             http.get('http://thecodinglove.com/random/', (incMessage: IncomingMessage) => {
@@ -64,7 +90,7 @@ export class ServerApp {
                         resHeaderLocation: '',
                         resHeadline: '',
                         resGifUrl:'',
-                        resBody: ''
+                        resGif: ''
                     }
                     responseData.resHeaderLocation = incMessage.headers.location;
 
@@ -82,10 +108,23 @@ export class ServerApp {
                         incRedMsg.on('end', () => {
                             headline = this.extractHeadline(body);
                             gifUrl = this.extractGifUrl(body);
-                            responseData.resBody = body;
                             responseData.resHeadline = headline;
                             responseData.resGifUrl = gifUrl;
-                            resToClient.json(responseData);
+
+                            // fetch gif
+                            http.get(gifUrl, (gifResponse) => {
+                                let gifRawData: any;
+                                gifResponse.on('data', (data) => {
+                                    gifRawData = data;
+                                });
+
+                                gifResponse.on('end', () => {
+                                    console.log('Gif Data: ', gifRawData);
+                                    responseData.resGif = gifRawData;
+                                    resToClient.json(responseData);
+                                });
+                            });
+
                         });
 
                         incRedMsg.on('error', (err) => {
@@ -100,7 +139,7 @@ export class ServerApp {
 
                 });
             });
-
+            next();
         });
     }
 
