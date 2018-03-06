@@ -3,6 +3,7 @@ import * as http from 'http';
 import { Application, Request, Response } from 'express';
 
 import { IncomingMessage } from 'http';
+// import * as cors from 'cors';
 
 export class ServerApp {
     
@@ -10,26 +11,10 @@ export class ServerApp {
     
     constructor () {
         this.app = express();
+        // this.app.use(cors());
         this.configureRoutes();
     }
     
-    private addHeaders(res) {
-        // Website you wish to allow to connect
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-
-        // Request methods you wish to allow
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-        // Request headers you wish to allow
-        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-        return res;
-        // Set to true if you need the website to include cookies in the requests sent
-        // to the API (e.g. in case you use sessions)
-        // res.setHeader('Access-Control-Allow-Credentials', true);
-
-        // Pass to next layer of middleware
-    }
-
     private configureRoutes() {
 
         // Root Route
@@ -53,8 +38,6 @@ export class ServerApp {
         // Random Lol Route
         this.app.route(randomPath).get((req: Request, resToClient: Response, next) => {
             console.log(`Random Path: ${randomPath}`);
-
-            resToClient = this.addHeaders(resToClient);
 
             // Get Call to thecodinglove.com/random which gets redirected
             http.get('http://thecodinglove.com/random/', (incMessage: IncomingMessage) => {
@@ -134,11 +117,13 @@ export class ServerApp {
                                  and ${err.stack}
                                 `);
                         });
-
+                        console.log('FOURTH callback');
                     });
-
+                    console.log('THIRD callback');
                 });
+                console.log('SECOND callback');
             });
+            console.log('FIRST callback');
             next();
         });
     }
