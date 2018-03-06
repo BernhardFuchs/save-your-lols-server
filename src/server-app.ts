@@ -25,6 +25,13 @@ export class ServerApp {
             next();
         });
         
+        /*
+        - Create Data model for response incl namespace and builder
+        - add Router middleware
+        - Create controller to forward request to
+        - integrate RsJs to handle forwarding of the request
+        */
+
         // Random Lol Route
         const randomPath: string | RegExp | (string | RegExp)[] = '/random';
         this.app.route(randomPath).get((req: Request, resToClient: Response) => {
@@ -64,7 +71,7 @@ export class ServerApp {
                         resHeaderLocation: '',
                         resHeadline: '',
                         resGifUrl:'',
-                        resBody: ''
+                        resGif: ''
                     }
                     responseData.resHeaderLocation = incMessage.headers.location;
 
@@ -82,10 +89,22 @@ export class ServerApp {
                         incRedMsg.on('end', () => {
                             headline = this.extractHeadline(body);
                             gifUrl = this.extractGifUrl(body);
-                            responseData.resBody = body;
                             responseData.resHeadline = headline;
                             responseData.resGifUrl = gifUrl;
-                            resToClient.json(responseData);
+
+                            http.get(gifUrl, (gifResponse) => {
+                                let gifRawData: any;
+                                gifResponse.on('data', (data) => {
+                                    gifRawData = data;
+                                });
+
+                                gifResponse.on('end', () => {
+                                    console.log('Gif Data: ', gifRawData);
+                                    responseData.resGif = gifRawData;
+                                    resToClient.json(responseData);
+                                });
+                            });
+
                         });
 
                         incRedMsg.on('error', (err) => {
