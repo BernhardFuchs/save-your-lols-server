@@ -11,6 +11,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@types/async": "^2.0.47",
+    "async": "^2.6.0",
     "express": "^4.16.2"
   },
   "devDependencies": {
