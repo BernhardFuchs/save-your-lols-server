@@ -9,6 +9,9 @@ const TCL_HOST: string = 'thecodinglove.com';
 
 export const getRandomTCL = (req: Request, res: Response) => {
     console.log('Random Controller');
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     
     async.waterfall([
         callRandomTCL,
