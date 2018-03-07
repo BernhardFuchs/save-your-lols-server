@@ -19,7 +19,8 @@ export function extractHeadline(body: string): string  {
 }
 
 export function extractGifUrl(body: string): string {
-    const foundGifUrls: string[] = body.match(/(<p class="e"><img src="(.*?)\.gif")/);
+    console.log(body);
+    const foundGifUrls: string[] = body.match(/(<p class=".*"><img src="(.*?)\.gif")/);
     const gifUrl: string[] = foundGifUrls[0].match(/(http(.*?)\.gif)/);
     return gifUrl[0];
 }
