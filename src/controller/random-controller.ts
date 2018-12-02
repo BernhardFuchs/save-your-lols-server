@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import * as http from 'http';
+import * as https from 'https';
 import * as async from 'async';
+import * as utf8 from 'utf8';
 import { IncomingMessage } from 'http';
-import { extractHeadline, extractGifUrl, extractPath, extractHost } from '../utils';
+import { extractHeadline, extractGifUrl, extractPath, extractHost, extractLocation } from '../utils';
 import { RequestOptions } from 'https';
 
 const TCL_HOST: string = 'thecodinglove.com';
@@ -12,11 +13,11 @@ export const getRandomTCL = (req: Request, res: Response) => {
 
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Content-Type", "application/json; charset=utf-8");
     
     async.waterfall([
         callRandomTCL,
-        redirectToTCL,
-        fetchGifData
+        redirectToTCL
     ], (err, responseData) => {
         if(err){
             console.log(err);
@@ -28,30 +29,10 @@ export const getRandomTCL = (req: Request, res: Response) => {
 
 }
 
-const fetchGifData = (responseData, callback) => {
-    log('fetchGifData started');
-    log(`Fetching GifUrl: ${responseData.gifUrl}`);
-    http.get(responseData.gifUrl, (incMessage: IncomingMessage) => {
-        incMessage.on('error', (err) => {
-            console.log('fetchGifData', err);
-        });
-        
-        let gifRawData: any;
-        incMessage.on('data', (data) => {
-            gifRawData = data;
-        });
-
-        incMessage.on('end', () => {
-            responseData.gifData = gifRawData;
-            callback(null, responseData);
-        });
-    });
-}
-
 const redirectToTCL = (responseData, callback) => {
     console.log(`redirectToTCL started: ${responseData.location}`);
 
-    http.get(responseData.location, (incMessage: IncomingMessage) => {
+    https.get(responseData.location, (incMessage: IncomingMessage) => {
         incMessage.on('error', (err) => {
             console.log('redirectToTCL', err);
         });
@@ -63,6 +44,7 @@ const redirectToTCL = (responseData, callback) => {
 
         incMessage.on('end', () => {
             responseData.headline = extractHeadline(body);
+            responseData.headline = utf8.encode(responseData.headline);
             responseData.gifUrl = extractGifUrl(body);
             callback(null, responseData);
         });
@@ -80,20 +62,28 @@ const callRandomTCL = (callback) => {
 
     const options: RequestOptions = {
         host: TCL_HOST,
-        path: '/random'
+        path: '/'
     }
     logOptions(options);
-    http.get(options, (incMessage: IncomingMessage) => {
+    https.get(options, (incMessage: IncomingMessage) => {
         incMessage.on('error', (err) => {
             console.log('callRandomTCL', err);
         });
 
         incMessage.on('readable', () => {
-            log(`Readable called`);
+          log(`${incMessage.statusCode}`);
+          log(`Readable called`);
+        });
+
+        let body: string = '';
+        incMessage.on('data', (data) => {
+          body += data;
         });
 
         incMessage.on('end', () => {
-            responseData.location = incMessage.headers.location;
+          log(`End called`);
+            responseData.location = extractLocation(body);
+            log(`${responseData.location}`);
             callback(null, responseData);
         });
     });

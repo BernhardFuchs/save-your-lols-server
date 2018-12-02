@@ -5,7 +5,7 @@ export function extractHost(url: string): string {
     return host;
 }
 
-// TODO refactor extractPath wo it no longer needs host
+// TODO refactor extractPath so it no longer needs host
 // use Regex instead
 export function extractPath(url: string, host: string): string {
     const path: string = url.replace(`http://${host}`, '');
@@ -13,13 +13,18 @@ export function extractPath(url: string, host: string): string {
 }
 
 export function extractHeadline(body: string): string  {
-    const foundHeadlines: string[] = body.match(/(<h3>(.*?)<\/h3>)/g);
-    const headline: string = foundHeadlines[0].replace(/<[^>]*>/g, '');
-    return headline;
+    const foundHeadlines: string[] = body.match(/(<h1 class="blog-post-title">(.*?)<\/h1>)/);
+    console.log('Headline: ', foundHeadlines[2]);
+    return foundHeadlines[2];
 }
 
 export function extractGifUrl(body: string): string {
-    const foundGifUrls: string[] = body.match(/(<p class=".*"><img src="(.*?)\.gif")/);
-    const gifUrl: string[] = foundGifUrls[0].match(/(http(.*?)\.gif)/);
-    return gifUrl[0];
+  body = body.replace(/\r?\n|\r/g,"");  
+  const foundGifUrls: string[] = body.match(/(<div class="blog-post-content">.*(http.*\.gif))/);
+    return foundGifUrls[2];
+}
+
+export function extractLocation(body: string): string {
+  const locations: string[] = body.match(/(<a class="nav-link" (href="(https:\/\/thecodinglove\.com\/.*?)"))/);
+  return locations[3];
 }
